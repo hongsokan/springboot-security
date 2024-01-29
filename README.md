@@ -50,28 +50,31 @@ public class WebMvcConfig implements WebMvcConfigurer {
 ```
 ### 4. SecurityConfig 설정
 ```java
-
 @Configuration // IoC 빈(bean)을 등록
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
+    public BCryptPasswordEncoder encodePwd() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(auth -> auth.disable());
         http.authorizeRequests()
-                .requestMatchers("/login").permitAll()
-                .requestMatchers("/").authenticated()
-                .requestMatchers("/user").hasAnyRole("ROLE_USER")
-                .requestMatchers("/manager").hasAnyRole("ROLE_MANAGER")
-                .requestMatchers("/admin").hasAnyRole("ROLE_ADMIN")
+                .requestMatchers("/", "/login", "/join").permitAll()
+//                .requestMatchers("/").authenticated()
+                .requestMatchers("/user/**").hasAnyRole("ROLE_USER")
+                .requestMatchers("/manager/**").hasAnyRole("ROLE_MANAGER")
+                .requestMatchers("/admin/**").hasAnyRole("ROLE_ADMIN")
                 .and()
                 .formLogin(login -> login
-//                        .loginPage("/login")	// [A] 커스텀 로그인 페이지 지정
-                        .loginProcessingUrl("/loginProc")	// [B] submit 받을 url
-                        .usernameParameter("userid")	// [C] submit할 아이디
-                        .passwordParameter("pw")	// [D] submit할 비밀번호
-                        .defaultSuccessUrl("/", true)
-                        .permitAll()
+                        .loginPage("/login")    // [A] 커스텀 로그인 페이지 지정
+                        .loginProcessingUrl("/loginProc")    // [B] submit 받을 url
+                        .usernameParameter("username")    // [C] submit할 아이디
+                        .passwordParameter("password")    // [D] submit할 비밀번호
+                        .defaultSuccessUrl("/")
                 );
 
         return http.build();
@@ -87,5 +90,6 @@ public class SecurityConfig {
 
         return hierarchy;
     }
+
 }
 ```
